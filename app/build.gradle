@@ -1,0 +1,83 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+    defaultConfig {
+        applicationId "com.example.yewi2.oocl"
+        minSdkVersion 15
+        targetSdkVersion 28
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    flavorDimensions "app"
+    productFlavors {
+        OOCL_dev {
+            applicationId "com.example.oocl.dev"
+            dimension "app"
+            versionCode 4
+            versionName "4.0.0"
+            buildConfigField 'String', 'Host', '"http://127.0.1.1:5000/"'
+            //signingConfig signingConfigs.one
+            manifestPlaceholders = [text_activity:"This is a Activity A",text_application:"This is a Application A"]
+        }
+        OOCL_prod {
+            applicationId "com.example.oocl.prod"
+            dimension "app"
+            versionCode 4
+            versionName "4.0.1"
+            buildConfigField 'String', 'Host', '"http://127.0.2.2:5000/"'
+            //signingConfig signingConfigs.two
+            manifestPlaceholders = [text_activity:"This is a Activity B",text_application:"This is a Application B"]
+        }
+        OOCL_qa {
+            applicationId "com.example.oocl.qa"
+            dimension "app"
+            versionCode 4
+            versionName "4.0.2"
+            buildConfigField 'String', 'Host', '"http://127.0.3.3:5000/"'
+            //signingConfig signingConfigs.two
+            manifestPlaceholders = [text_activity:"This is a Activity B",text_application:"This is a Application B"]
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
+    def fileArray = []
+    android.applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def outputFile = output.outputFile
+            def fileName
+            def variantProd
+            if (outputFile != null && outputFile.name.contains('release')) {
+                variantProd = variant.productFlavors[0]
+                fileName = "${variantProd.name}_Release.apk"
+            } else if (outputFile != null && outputFile.name.contains('debug')) {
+                variantProd = variant.productFlavors[0]
+                fileName = "${variantProd.name}_Debug.apk"
+            }
+            println "apk name:" + fileName
+            outputFileName = fileName
+            println "apk address:" + outputFile.parentFile.absolutePath + java.io.File.separator + fileName
+            fileArray.add(outputFile.parentFile.absolutePath + java.io.File.separator + fileName)
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:appcompat-v7:28.+'
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.1'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
+}
